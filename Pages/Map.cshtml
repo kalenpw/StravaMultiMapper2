@@ -1,0 +1,69 @@
+﻿@page
+@inject IConfiguration Configuration
+@using StravaMultiMapper2.Models
+@model StravaMultiMapper2.Pages.MapModel
+@{
+}
+
+<script async src="https://maps.googleapis.com/maps/api/js?key=@Configuration["Google:MapsApiKey"]&callback=showActivities&libraries=geometry">
+</script>
+
+<div id="map"></div>
+
+<div id="UserPill">
+    <div class="FlexWrapper">
+        <img src="@ViewData["ProfilePicture"]" />
+        <div class="UserWrapper">
+            <div class="Username">@ViewData["Username"]</div>
+            <div class="ActivityCount">@ViewData["ActivityCount"] activities</div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function showActivities() {
+        const styles = [
+            {
+                featureType: "transit",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }],
+            },
+            {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "landscape",
+                elementType: "labels",
+                stylers: [{ "visibility": "off" }]
+            }
+        ];
+
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: { lat: 0, lng: 0 },
+            mapTypeId: "terrain",
+            styles: styles
+        });
+
+        var encodedPaths = @Html.Raw(Json.Serialize(ViewData["EncodedList"]));
+
+        for (var path of encodedPaths) {
+            var decodedPath = google.maps.geometry.encoding.decodePath(path);
+            const activityPath = new google.maps.Polyline({
+                path: decodedPath,
+                strokeColor: "#FF0000",
+                strokeOpacity: 0.5,
+                strokeWeight: 2,
+            });
+
+            activityPath.setMap(map);
+        }
+
+        var mostRecentActivity = google.maps.geometry.encoding.decodePath(encodedPaths[0]);
+
+        map.setCenter(mostRecentActivity[0]);
+    }
+</script>

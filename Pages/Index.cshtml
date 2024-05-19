@@ -1,0 +1,12 @@
+﻿@page
+@inject IConfiguration Configuration
+@model IndexModel
+@{
+    var redirectUrl = $"{Request.Scheme}://{Request.Host}";
+    var stravaUrl = $"https://www.strava.com/oauth/authorize?client_id={Configuration["Strava:ClientId"]}&scope=activity:read_all&response_type=code&redirect_uri={redirectUrl}";
+}
+
+
+<a href="@stravaUrl">Log in with Strava</a>
+
+
